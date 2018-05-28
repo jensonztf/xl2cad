@@ -1,0 +1,12 @@
+Windows Registry Editor Version 5.00
+[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Office\Excel\Addins\xl2cad_wps.Ribbon]
+"DESCRIPTION"="wpsRibbon"
+"LOADBehavior"=dword:00000003
+"CommandLineSafe"=dword:00000001
+[HKEY_CURRENT_USER\Software\Kingsoft\Office\ET\AddinsWL]
+"xl2cad_wps.Ribbon"=""
+[HKEY_LOCAL_MACHINE\SOFTWARE\Autodesk\AutoCAD\R17.1\ACAD-6001:804\Applications\xl2cad.Command]
+"DESCRIPTION"="xl2cad.Command"
+"LOADCTRLS"=dword:00000002
+"LOADER"="D:\\XL2CAD\\xl2cad\\bin\\Debug\\xl2cad.dll"
+"MANAGED"=dword:00000001
