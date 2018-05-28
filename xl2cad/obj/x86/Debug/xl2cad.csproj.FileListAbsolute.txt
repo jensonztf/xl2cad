@@ -1,2 +1,0 @@
-D:\XL2CAD\xl2cad\obj\x86\Debug\Interop.AddInDesignerObjects.dll
-D:\XL2CAD\xl2cad\obj\x86\Debug\xl2cad.csproj.ResolveComReference.cache
