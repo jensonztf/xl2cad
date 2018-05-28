@@ -1,0 +1,12 @@
+<customUI xmlns='http://schemas.microsoft.com/office/2009/07/customui'>
+      <ribbon>
+        <tabs>
+          <tab id="xl2cad" label="XL2CAD">
+            <group id="xl2cad" label="XL2CAD">
+              <button id="button1" label="导入CAD" onAction="OnButton1Pressed"/>
+			  <button id="button2" label="CAD导出" onAction="OnButton2Pressed"/>
+            </group >
+          </tab>
+        </tabs>
+      </ribbon>
+    </customUI>

@@ -1,0 +1,11 @@
+D:\XL2CAD\xl2cad\obj\Debug\xl2cad.csprojResolveAssemblyReference.cache
+D:\XL2CAD\xl2cad\obj\Debug\Interop.AddInDesignerObjects.dll
+D:\XL2CAD\xl2cad\obj\Debug\xl2cad.csproj.ResolveComReference.cache
+D:\XL2CAD\xl2cad\obj\Debug\xl2cad.Resource1.resources
+D:\XL2CAD\xl2cad\obj\Debug\xl2cad.csproj.GenerateResource.Cache
+D:\XL2CAD\xl2cad\bin\Debug\xl2cad.dll
+D:\XL2CAD\xl2cad\bin\Debug\xl2cad.pdb
+D:\XL2CAD\xl2cad\obj\Debug\xl2cad.dll
+D:\XL2CAD\xl2cad\obj\Debug\xl2cad.pdb
+D:\XL2CAD\xl2cad\bin\Debug\xl2cad.tlb
+D:\XL2CAD\xl2cad\bin\Debug\Interop.AddInDesignerObjects.dll
