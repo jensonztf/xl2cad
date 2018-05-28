@@ -68,6 +68,7 @@
     <Reference Include="acdbmgd">
       <HintPath>C:\Program Files\AutoCAD 2008\acdbmgd.dll</HintPath>
       <Private>False</Private>
+      <Aliases>global</Aliases>
     </Reference>
     <Reference Include="acmgd">
       <HintPath>C:\Program Files\AutoCAD 2008\acmgd.dll</HintPath>
@@ -107,6 +108,7 @@
       <WrapperTool>primary</WrapperTool>
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
+      <Private>False</Private>
     </COMReference>
     <COMReference Include="AXDBLib">
       <Guid>{11A32D00-9E89-4C16-82CB-629DEBA56AE2}</Guid>
@@ -116,6 +118,7 @@
       <WrapperTool>primary</WrapperTool>
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
+      <Private>False</Private>
     </COMReference>
     <COMReference Include="Excel">
       <Guid>{45541000-5750-5300-4B49-4E47534F4655}</Guid>

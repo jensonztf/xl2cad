@@ -12,18 +12,18 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 
-//[assembly:CommandClass(typeof(xl2cad_cad.zDBText))]
-//namespace xl2cad_cad
-//{
-//    public class zDBText
-//    {
-//        [CommandMethod("zdbtext")]
-//        public void zdbtext()
-//        {
-
-//        }
-//    }
-//}
+namespace xl2cad_cad
+{
+    public class zDBText
+    {
+        [CommandMethod("zdbtext")]
+        public void zdbtext()
+        {
+            Editor ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
+            ed.WriteMessage("\n Hello!");
+        }
+    }
+}
 
 
 namespace xl2cad_wps
@@ -96,7 +96,7 @@ namespace xl2cad_wps
             //使CAD程序跳到在最前面，需要添加引用“Microsoft.VisualBasic”
             Microsoft.VisualBasic.Interaction.AppActivate(AcadApp.Caption);
 
-            AcadDoc.SendCommand("ztfPickPoint ");
+            AcadDoc.SendCommand("zdbtext ");
 
         }
 
@@ -106,4 +106,3 @@ namespace xl2cad_wps
         }
     }
 }
-
