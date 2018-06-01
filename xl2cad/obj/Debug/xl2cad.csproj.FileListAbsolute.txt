@@ -9,3 +9,6 @@ D:\XL2CAD\xl2cad\obj\Debug\xl2cad.dll
 D:\XL2CAD\xl2cad\obj\Debug\xl2cad.pdb
 D:\XL2CAD\xl2cad\bin\Debug\xl2cad.tlb
 D:\XL2CAD\xl2cad\bin\Debug\Interop.AddInDesignerObjects.dll
+D:\xl2cad\xl2cad\bin\Debug\acdbmgd.dll
+D:\xl2cad\xl2cad\bin\Debug\acmgd.dll
+D:\xl2cad\xl2cad\bin\Debug\zh-cn\acdbmgd.resources.dll

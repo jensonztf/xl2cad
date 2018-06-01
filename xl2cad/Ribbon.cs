@@ -11,6 +11,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
+using xl2cad;
 
 namespace xl2cad_cad
 {
@@ -20,8 +21,64 @@ namespace xl2cad_cad
         public void zdbtext()
         {
             Editor ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
-            ed.WriteMessage("\n Hello!");
+            ed.WriteMessage("请选取一行单行文字作为表格第一行\n"
+                           +"每列文字的字体与此列第一行文字相同。");
+            //单行文字的过滤器
+            FilterType[] filter = new FilterType[1];
+            filter[0] = FilterType.Text;
+            DBObjectCollection EntityCollection = GetSection(filter);
+            foreach (Entity ent in EntityCollection)
+            {
+                ed.WriteMessage(ent.ColorIndex.ToString());
+            }
+
+
         }
+
+        public static DBObjectCollection GetSection(FilterType[] filter)
+        {
+            Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
+            Database db = doc.Database;
+            Editor ed = doc.Editor;
+            Entity entity = null;
+            DBObjectCollection entityCollection = new DBObjectCollection();
+            PromptSelectionOptions selops = new PromptSelectionOptions();
+            //建立选择的过滤器内容
+            TypedValue[] filList = new TypedValue[filter.Length + 2];
+            filList[0] = new TypedValue((int)DxfCode.Operator,"<or");
+            filList[filter.Length + 1] = new TypedValue((int)DxfCode.Operator,"or>");
+            for (int i = 0; i < filter.Length; i++)
+            {
+                filList[i + 1] = new TypedValue((int)DxfCode.Start,filter[i].ToString());
+            }
+            //建立过滤器
+            SelectionFilter f = new SelectionFilter(filList);
+            //按照过滤器进行选择
+            PromptSelectionResult ents = ed.GetSelection(selops, f);
+            if (ents.Status == PromptStatus.OK)
+            {
+                using (Transaction transaction = db.TransactionManager.StartTransaction())
+                {
+                    SelectionSet SS = ents.Value;
+                    foreach (ObjectId id in SS.GetObjectIds())
+                    {
+                        entity = (Entity)transaction.GetObject(id, OpenMode.ForWrite, true);
+                        if (entity != null)
+                        {
+                            entityCollection.Add(entity);
+                        }
+                    }
+                    transaction.Commit();
+                }
+            }
+            return entityCollection;
+        }
+    }
+
+    public enum FilterType
+    {
+        Curve,Dimension,Polyline,BlockRef,Circle,Line,Arc,Text,MText,Polyline3d,Surface,
+        Region,Solid3d,Hatch,Helix,DBPoint
     }
 }
 
@@ -96,6 +153,8 @@ namespace xl2cad_wps
             //使CAD程序跳到在最前面，需要添加引用“Microsoft.VisualBasic”
             Microsoft.VisualBasic.Interaction.AppActivate(AcadApp.Caption);
 
+            //让CAD自动执行netload命令加载程序集DLL
+            AcadDoc.SendCommand("(command \"_netload\" \"" + @"C:\\Windows\\System\\xl2cad.dll" + "\") ");
             AcadDoc.SendCommand("zdbtext ");
 
         }

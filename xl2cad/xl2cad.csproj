@@ -66,13 +66,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="acdbmgd">
-      <HintPath>C:\Program Files\AutoCAD 2008\acdbmgd.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\Program Files (x86)\AutoCAD 2008\acdbmgd.dll</HintPath>
+      <Private>True</Private>
       <Aliases>global</Aliases>
     </Reference>
     <Reference Include="acmgd">
-      <HintPath>C:\Program Files\AutoCAD 2008\acmgd.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\Program Files (x86)\AutoCAD 2008\acmgd.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
@@ -142,15 +142,6 @@
       <Guid>{00020430-0000-0000-C000-000000000046}</Guid>
       <VersionMajor>2</VersionMajor>
       <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>primary</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
-    <COMReference Include="VBIDE">
-      <Guid>{0002E157-0000-0000-C000-000000000046}</Guid>
-      <VersionMajor>5</VersionMajor>
-      <VersionMinor>3</VersionMinor>
       <Lcid>0</Lcid>
       <WrapperTool>primary</WrapperTool>
       <Isolated>False</Isolated>
