@@ -11,7 +11,9 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.Colors;
 using xl2cad;
+
 
 namespace xl2cad_cad
 {
@@ -20,22 +22,42 @@ namespace xl2cad_cad
         [CommandMethod("zdbtext")]
         public void zdbtext()
         {
+            Database db = HostApplicationServices.WorkingDatabase;
             Editor ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
             ed.WriteMessage("请选取一行单行文字作为表格第一行\n"
-                           +"每列文字的字体与此列第一行文字相同。");
+                           + "每列文字的字体与此列第一行文字相同。");
             //单行文字的过滤器
             FilterType[] filter = new FilterType[1];
             filter[0] = FilterType.Text;
-            DBObjectCollection EntityCollection = GetSection(filter);
-            foreach (Entity ent in EntityCollection)
+            //选取第一行DBText
+            DBObjectCollection EntityCollection = GetFirstRow(filter);
+            //
+
+            using (Transaction transaction = db.TransactionManager.StartTransaction())
             {
-                ed.WriteMessage(ent.ColorIndex.ToString());
+                try
+                {
+                    foreach (DBObject obj in EntityCollection)
+                    {
+                        Entity ent = (Entity)transaction.GetObject(obj.ObjectId, OpenMode.ForWrite, true);
+                        ent.Color = Color.FromColorIndex(ColorMethod.ByAci, 2);
+                    }
+                    transaction.Commit();
+                }
+                catch
+                {
+                    ed.WriteMessage("Error！");
+                }
+                finally
+                {
+                    transaction.Dispose();
+                }
             }
 
 
         }
 
-        public static DBObjectCollection GetSection(FilterType[] filter)
+        public static DBObjectCollection GetFirstRow(FilterType[] filter)
         {
             Document doc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
             Database db = doc.Database;
@@ -45,11 +67,11 @@ namespace xl2cad_cad
             PromptSelectionOptions selops = new PromptSelectionOptions();
             //建立选择的过滤器内容
             TypedValue[] filList = new TypedValue[filter.Length + 2];
-            filList[0] = new TypedValue((int)DxfCode.Operator,"<or");
-            filList[filter.Length + 1] = new TypedValue((int)DxfCode.Operator,"or>");
+            filList[0] = new TypedValue((int)DxfCode.Operator, "<or");
+            filList[filter.Length + 1] = new TypedValue((int)DxfCode.Operator, "or>");
             for (int i = 0; i < filter.Length; i++)
             {
-                filList[i + 1] = new TypedValue((int)DxfCode.Start,filter[i].ToString());
+                filList[i + 1] = new TypedValue((int)DxfCode.Start, filter[i].ToString());
             }
             //建立过滤器
             SelectionFilter f = new SelectionFilter(filList);
@@ -59,16 +81,27 @@ namespace xl2cad_cad
             {
                 using (Transaction transaction = db.TransactionManager.StartTransaction())
                 {
-                    SelectionSet SS = ents.Value;
-                    foreach (ObjectId id in SS.GetObjectIds())
+                    try
                     {
-                        entity = (Entity)transaction.GetObject(id, OpenMode.ForWrite, true);
-                        if (entity != null)
+                        SelectionSet SS = ents.Value;
+                        foreach (ObjectId id in SS.GetObjectIds())
                         {
-                            entityCollection.Add(entity);
+                            entity = (Entity)transaction.GetObject(id, OpenMode.ForWrite, true);
+                            if (entity != null)
+                            {
+                                entityCollection.Add(entity);
+                            }
                         }
+                        transaction.Commit();
                     }
-                    transaction.Commit();
+                    catch
+                    {
+                        ed.WriteMessage("Error ");
+                    }
+                    finally
+                    {
+                        transaction.Dispose();
+                    }
                 }
             }
             return entityCollection;
@@ -77,8 +110,8 @@ namespace xl2cad_cad
 
     public enum FilterType
     {
-        Curve,Dimension,Polyline,BlockRef,Circle,Line,Arc,Text,MText,Polyline3d,Surface,
-        Region,Solid3d,Hatch,Helix,DBPoint
+        Curve, Dimension, Polyline, BlockRef, Circle, Line, Arc, Text, MText, Polyline3d, Surface,
+        Region, Solid3d, Hatch, Helix, DBPoint
     }
 }
 
@@ -123,9 +156,13 @@ namespace xl2cad_wps
             return xl2cad.Resource1.RibbonXML;
         }
 
-        //Ribbon界面的回调函数，响应事件
+        //Ribbon界面的回调函数，响应事件，将Excel表格数据写入CAD
         public void OnButton1Pressed(IRibbonControl control)
         {
+            //选取Excel表格数据
+            System.Data.DataTable dt = new System.Data.DataTable();
+
+
             //打开cad
             try
             {
