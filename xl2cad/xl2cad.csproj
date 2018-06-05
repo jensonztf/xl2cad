@@ -65,14 +65,14 @@
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="acdbmgd">
-      <HintPath>..\..\Program Files (x86)\AutoCAD 2008\acdbmgd.dll</HintPath>
-      <Private>True</Private>
-      <Aliases>global</Aliases>
+    <Reference Include="acdbmgd, Version=17.1.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\AutoCAD 2008\acdbmgd.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="acmgd">
-      <HintPath>..\..\Program Files (x86)\AutoCAD 2008\acmgd.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>C:\Program Files\AutoCAD 2008\acmgd.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
@@ -100,6 +100,26 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
       <Private>True</Private>
     </COMReference>
+    <COMReference Include="ADODB">
+      <Guid>{2A75196C-D9EB-4129-B803-931327F72D5C}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>8</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <Private>True</Private>
+    </COMReference>
+    <COMReference Include="ADOX">
+      <Guid>{00000600-0000-0010-8000-00AA006D2EA4}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>8</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <Private>True</Private>
+    </COMReference>
     <COMReference Include="AutoCAD">
       <Guid>{851A4561-F4EC-4631-9B0C-E7DC407512C9}</Guid>
       <VersionMajor>1</VersionMajor>
@@ -108,7 +128,6 @@
       <WrapperTool>primary</WrapperTool>
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
-      <Private>False</Private>
     </COMReference>
     <COMReference Include="AXDBLib">
       <Guid>{11A32D00-9E89-4C16-82CB-629DEBA56AE2}</Guid>
@@ -118,7 +137,6 @@
       <WrapperTool>primary</WrapperTool>
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
-      <Private>False</Private>
     </COMReference>
     <COMReference Include="Excel">
       <Guid>{45541000-5750-5300-4B49-4E47534F4655}</Guid>
