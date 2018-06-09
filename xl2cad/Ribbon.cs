@@ -299,10 +299,12 @@ namespace xl2cad_wps
                     if (filePath == "")
                     {
                         MessageBox.Show("选择CAD文件无效!", "文件无效!");
-                        System.Windows.Forms.Application.Exit();
                     }
-                    AcadApp = new Autodesk.AutoCAD.Interop.AcadApplication();
-                    AcadDoc = AcadApp.Documents.Open(filePath, null, null);
+                    else
+                   ｛
+                        AcadApp = new Autodesk.AutoCAD.Interop.AcadApplication();
+                        AcadDoc = AcadApp.Documents.Open(filePath, null, null);
+                    ｝
                 }
                 AcadApp.Application.Visible = true;
                 //使CAD程序跳到在最前面，需要添加引用“Microsoft.VisualBasic”
