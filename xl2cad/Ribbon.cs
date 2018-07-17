@@ -408,6 +408,7 @@ namespace xl2cad_wps
             cn.Close();
             System.Runtime.InteropServices.Marshal.FinalReleaseComObject(cn);
             System.Runtime.InteropServices.Marshal.FinalReleaseComObject(cat);
+            GC.Collect();
 
         }
 
