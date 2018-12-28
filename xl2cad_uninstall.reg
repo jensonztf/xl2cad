@@ -8,5 +8,5 @@ Windows Registry Editor Version 5.00
 [-HKEY_LOCAL_MACHINE\SOFTWARE\Autodesk\AutoCAD\R17.1\ACAD-6001:804\Applications\xl2cad.Command]
 "DESCRIPTION"="xl2cad.Command"
 "LOADCTRLS"=dword:00000002
-"LOADER"="D:\\XL2CAD\\xl2cad\\bin\\Debug\\xl2cad.dll"
+"LOADER"="C:\\Windows\\system\\xl2cad.dll"
 "MANAGED"=dword:00000001
