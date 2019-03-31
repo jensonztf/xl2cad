@@ -1,0 +1,25 @@
+编译
+每个版本的CAD要单独编译，x32和x64也要单独编译
+1.添加好引用，包括：
+	acdbmgd	---->	acdbmgd.dll,复制到本地 false
+	acmgd	---->	acmgd.dll,复制到本地 false
+	Interop.AddInDesignerObjects	---->	复制到本地 true
+	Interop.ADODB	---->	复制到本地 true
+	Interop.ADOX	---->	复制到本地 true
+	Autodesk.AutoCAD.Interop	---->	复制到本地 false
+	Autodesk.AutoCAD.Interop.Common	---->	复制到本地 false
+	Kingsoft.Office.Interop.Etapi	---->	复制到本地 false
+	Microsoft.VisualBasic
+	Kingsoft.Office.Interop.Ksoapi	---->	复制到本地 false
+	stdole
+2.生成
+
+
+安装
+1.将Debug文件夹下的Interop.AddInDesignerObjects.dll,Interop.ADODB.dll,Interop.ADOX.dll,xl2cad.dll复制到C:\Windows\system\目录下,
+2.检测本机cad安装了那些版本，弹出对话框让用户选择，根据选取的版本找到cad安装目录，将acdbmgd.dll，acmgd.dll拷贝到C:\Windows\system\目录下，或者C:\Program Files\AutoCAD XXXX\目录下，
+3.运行.bat，
+4.运行install.reg
+
+问题
+1.如果编译提示“未能注册程序集，找不到指定的模块。。。”，意思是有些模块所在的dll没有被调用，很大可能不是系统少了，而是没有放到debug文件夹内。可用Dependency Walker 工具查看xl2cad.dll调用了那些模块，甚至可能是某个被xl2cad.dl所l调用的dll，他自己调用的其他模块没放到debug文件夹内。比如这次就是xl2cad.dll调用的acdbmgd.dll，他自己调用的acge17.dll,acdb17.dll,ac1st17.dll没有被放到debug下。网上普遍能搜索到的少了的dll一般都不是问题所在
