@@ -31,21 +31,33 @@ namespace xl2cad_cad
             ed.WriteMessage("请选取一行单行文字作为表格第一行\n"
                            + "每列文字的字体与此列第一行文字相同。");
             //从数据库读取文件
+            OleDbConnection con = null;
+            OleDbDataAdapter da = null;
             try
             {
-                OleDbConnection con = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data source=D:\\xl2cad.mdb");
+                con = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data source=D:\\xl2cad.mdb");
                 con.Open();
                 string sql = "select * from excel2cad";
-                OleDbDataAdapter da = new OleDbDataAdapter(sql, con);
+                da = new OleDbDataAdapter(sql, con);
                 System.Data.DataSet ds = new System.Data.DataSet();
                 dt = new System.Data.DataTable();
                 da.Fill(ds, "excel2cad");
                 dt = ds.Tables[0];
                 con.Close();
+                con.Dispose();
+                da.Dispose();
+                System.GC.Collect();
             }
             catch (SystemException ex)
             {
                 ed.WriteMessage(ex.ToString());
+            }
+            finally
+            {
+                con.Close();
+                con.Dispose();
+                da.Dispose();
+                System.GC.Collect();
             }
             //选取第一行DBText
             //单行文字的过滤器
@@ -175,6 +187,8 @@ namespace xl2cad_cad
                             if (entity != null)
                             {
                                 entityCollection.Add(entity);
+                                DBText ddd = entity as DBText;
+                                //ed.WriteMessage(ddd.TextString + entity.ObjectId.ToString() + "\n");
                             }
                         }
                         transaction.Commit();
@@ -186,6 +200,26 @@ namespace xl2cad_cad
                     finally
                     {
                         transaction.Dispose();
+                    }
+                }
+            }
+            //目前entityCollection中的文字是按照ObjectId的大小排序的，如果出现Id大的在Id小的左边，就出现写入文字错位。
+            //对entityCollection中的文字进行排序，按照Point.X从大到小(后面导入文字时使用的foreach在本程序体现出来的是倒序)的顺序排序。防止写入文字是错位。
+            DBObjectCollection entityCollection1 = new DBObjectCollection();
+            DBText k1 = null;
+            DBText k2 = null;
+            Entity temp1 = null;
+            for (int ii = 0; ii < entityCollection.Count-1;ii++ )
+            {
+                for(int jj=0;jj<entityCollection.Count-1-ii;jj++)
+                {
+                    k1 = entityCollection[jj] as DBText;
+                    k2 = entityCollection[jj+1] as DBText;
+                    if(k1.Position.X < k2.Position.X)
+                    {
+                        temp1 = entityCollection[jj+1] as Entity;
+                        entityCollection[jj+1] = entityCollection[jj];
+                        entityCollection[jj] = temp1;
                     }
                 }
             }
@@ -203,8 +237,8 @@ namespace xl2cad_cad
             Database db = HostApplicationServices.WorkingDatabase;
             Editor ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
             ed.WriteMessage("请选取矩形\n");
-            Autodesk.AutoCAD.Interop.AcadApplication AcadApp = (Autodesk.AutoCAD.Interop.AcadApplication)System.Runtime.InteropServices.Marshal.GetActiveObject("AutoCAD.Application");
-            Autodesk.AutoCAD.Interop.AcadDocument acaddoc = AcadApp.ActiveDocument;
+            //Autodesk.AutoCAD.Interop.AcadApplication AcadApp = (Autodesk.AutoCAD.Interop.AcadApplication)System.Runtime.InteropServices.Marshal.GetActiveObject("AutoCAD.Application");
+            //Autodesk.AutoCAD.Interop.AcadDocument acaddoc = AcadApp.ActiveDocument;
             Entity entity = null;
             FilterType[] filter = new FilterType[1];
             //选取矩形之过滤条件
@@ -267,7 +301,7 @@ namespace xl2cad_cad
                                     //ed.WriteMessage(entity.GetRXClass().DxfName + "\n");
                                 }
                             }
-                            ed.WriteMessage(lineCollection.Count.ToString());
+                            //ed.WriteMessage(lineCollection.Count.ToString());
                             transaction.Commit();
                         }
                     }
@@ -415,7 +449,7 @@ namespace xl2cad_cad
                         pointName1 = y_text + "-" + x_text;
                         //如果单元格内有多个文字，则将其内容拼在一起
                         table[y_index, x_index] += db_text.TextString;
-                        ed.WriteMessage("\n" + db_text.TextString + " 位置为" + pointName1);
+                        //ed.WriteMessage("\n" + db_text.TextString + " 位置为" + pointName1);
                     }
 
                     #endregion
@@ -456,7 +490,7 @@ namespace xl2cad_cad
                     int index = fileName1.LastIndexOf("//");//获取最后一个/的索引
                     fileName1 = fileName1.Substring(index + 1);//获取excel名称(新建表的路径相对于SaveFileDialog的路径)
                 }
-                foreach(midTable table in tables)
+                foreach (midTable table in tables)
                 {
                     xl2cad_wps.AccessDataBase.ReadDB(table.Name, fileName1);
                 }
@@ -470,6 +504,7 @@ namespace xl2cad_cad
             }
             finally
             {
+                System.GC.Collect();
             }
         }
         private Dictionary<ObjectId, Entity> GetRectangle(FilterType[] filter)
@@ -759,82 +794,96 @@ namespace xl2cad_wps
             cn.Close();
             System.Runtime.InteropServices.Marshal.FinalReleaseComObject(cn);
             System.Runtime.InteropServices.Marshal.FinalReleaseComObject(cat);
+            System.GC.Collect();
         }
 
         public static void WriteDB(List<xl2cad_cad.midTable> tables)
         {
             string filePath = @"D:\xl2cad.mdb";
             string mdbCommand = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + filePath + ";Jet OLEDB:Engine Type=5";
-            //创建数据库，有就删除重建，没有则新建
-            ADOX.CatalogClass cat = new CatalogClass();
-            if (File.Exists(filePath))
+            ADODB.Connection cn = null;
+            ADOX.CatalogClass cat = null;
+            try
             {
-                File.Delete(filePath);
-            }
-            cat.Create(mdbCommand);
-            //连接数据库
-            ADODB.Connection cn = new ADODB.Connection();
-            cn.Open("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + filePath, null, null, -1);
-            cat = null;
-            cat = new CatalogClass();
-            cat.ActiveConnection = cn;
-            //创建数据表
-            foreach (xl2cad_cad.midTable midtable in tables)
-            {
-                ADOX.TableClass table = new TableClass();
-                string tablename = midtable.Name;
-                table.ParentCatalog = cat;
-                table.Name = tablename;
-                cat.Tables.Append(table);
-                //将数据写入数据表
-                //Excel.WorkSheet.Range导出的object[obj1,obj2]中,obj1为行，obj2为列
-                //因此先按obj2的个数建立字段，在按obj1的个数一行行填入数据
-                object[,] datas = midtable.data;
-                int rowCount = 0;
-                int columnCount = 0;
-                rowCount = datas.GetUpperBound(0);      //第一维obj1的最大值，行数
-                columnCount = datas.GetUpperBound(1);   //第二维obj2的最大值，列数
-                //建立字段
-                for (int i = 0; i <= columnCount; i++)
+                //创建数据库，有就删除重建，没有则新建
+                cat = new CatalogClass();
+                if (File.Exists(filePath))
                 {
-                    ADOX.ColumnClass col = null;
-                    col = new ADOX.ColumnClass();
-                    col.ParentCatalog = cat;
-                    col.Properties["Jet OLEDB:Allow Zero Length"].Value = true;
-                    col.Name = "Value" + i;
-                    table.Columns.Append(col, ADOX.DataTypeEnum.adVarChar, 25);
+                    File.Delete(filePath);
                 }
-                //按行填入数据
-                object ra = null;
-                ADODB.Recordset rs = new ADODB.Recordset();
-                for (int i = 0; i <= rowCount; i++)
+                cat.Create(mdbCommand);
+                //连接数据库
+                cn = new ADODB.Connection();
+                cat = null;
+                cat = new CatalogClass();
+                //创建数据表
+                foreach (xl2cad_cad.midTable midtable in tables)
                 {
-                    //构造按行写入的sql语句
-                    string sql1 = String.Format("INSERT INTO {0} (", tablename);
-                    string sql2 = String.Format(") VALUES (");
-                    string strValue = null;
-                    for (int j = 0; j <= columnCount; j++)
+                    cn.Open("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + filePath, null, null, -1);
+                    cat.ActiveConnection = cn;
+                    ADOX.TableClass table = new TableClass();
+                    string tablename = midtable.Name;
+                    table.ParentCatalog = cat;
+                    table.Name = tablename;
+                    cat.Tables.Append(table);
+                    //将数据写入数据表
+                    //Excel.WorkSheet.Range导出的object[obj1,obj2]中,obj1为行，obj2为列
+                    //因此先按obj2的个数建立字段，在按obj1的个数一行行填入数据
+                    object[,] datas = midtable.data;
+                    int rowCount = 0;
+                    int columnCount = 0;
+                    rowCount = datas.GetUpperBound(0);      //第一维obj1的最大值，行数
+                    columnCount = datas.GetUpperBound(1);   //第二维obj2的最大值，列数
+                    //建立字段
+                    for (int i = 0; i <= columnCount; i++)
                     {
-                        if (datas[i, j] == null)
-                        {
-                            strValue = datas[i, j] as string;
-                        }
-                        else
-                        {
-                            strValue = datas[i, j].ToString();
-                        }
-                        sql1 += String.Format("Value{0},", j);
-                        sql2 += String.Format("'{0}',", strValue);
+                        ADOX.ColumnClass col = null;
+                        col = new ADOX.ColumnClass();
+                        col.ParentCatalog = cat;
+                        col.Properties["Jet OLEDB:Allow Zero Length"].Value = true;
+                        col.Name = "Value" + i;
+                        table.Columns.Append(col, ADOX.DataTypeEnum.adVarChar, 25);
                     }
-                    string sql = sql1 + sql2 + ")";
-                    //将 ,) 替换为 ）
-                    sql = sql.Replace(",)", ")");
-                    rs = cn.Execute(sql, out ra, -1);
+                    //按行填入数据
+                    object ra = null;
+                    ADODB.Recordset rs = new ADODB.Recordset();
+                    for (int i = 0; i <= rowCount; i++)
+                    {
+                        //构造按行写入的sql语句
+                        string sql1 = String.Format("INSERT INTO {0} (", tablename);
+                        string sql2 = String.Format(") VALUES (");
+                        string strValue = null;
+                        for (int j = 0; j <= columnCount; j++)
+                        {
+                            if (datas[i, j] == null)
+                            {
+                                strValue = datas[i, j] as string;
+                            }
+                            else
+                            {
+                                strValue = datas[i, j].ToString();
+                            }
+                            sql1 += String.Format("Value{0},", j);
+                            sql2 += String.Format("'{0}',", strValue);
+                        }
+                        string sql = sql1 + sql2 + ")";
+                        //将 ,) 替换为 ）
+                        sql = sql.Replace(",)", ")");
+                        rs = cn.Execute(sql, out ra, -1);
+                    }
                 }
             }
-            cn.Close();
-            System.Runtime.InteropServices.Marshal.FinalReleaseComObject(cn);
-            System.Runtime.InteropServices.Marshal.FinalReleaseComObject(cat);
+            catch (System.Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            finally
+            {
+                cn.Close();
+                System.Runtime.InteropServices.Marshal.FinalReleaseComObject(cn);
+                System.Runtime.InteropServices.Marshal.FinalReleaseComObject(cat);
+                System.GC.Collect();
+            }
         }
 
         public static void ReadDB(string tableName, string fileName)
@@ -845,13 +894,28 @@ namespace xl2cad_wps
                 //select * into 建立 新的表。
                 //[[Excel 8.0;database= excel名].[sheet名] 如果是新建sheet表不能加$,如果向sheet里插入数据要加$.　
                 //sheet最多存储65535条数据。
-                object ra = null;
-                string sql = "select top 65535 * into [Excel 8.0;database=" + fileName + "].[" + tableName + "] from " + tableName;
-                ADODB.Connection cn = new ADODB.Connection();
-                cn.Open("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + filePath, null, null, -1);
-                cn.Execute(sql, out ra, -1);
-                cn.Close();
-                System.Runtime.InteropServices.Marshal.FinalReleaseComObject(cn);
+                ADODB.Connection cn = null;
+                try
+                {
+                    object ra = null;
+                    string sql = "select top 65535 * into [Excel 8.0;database=" + fileName + "].[" + tableName + "] from " + tableName;
+                    cn = new ADODB.Connection();
+                    cn.Open("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + filePath, null, null, -1);
+                    cn.Execute(sql, out ra, -1);
+                    cn.Close();
+                    System.Runtime.InteropServices.Marshal.FinalReleaseComObject(cn);
+                }
+                catch (System.Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
+                finally
+                {
+                    cn.Close();
+                    System.Runtime.InteropServices.Marshal.FinalReleaseComObject(cn);
+                    System.GC.Collect();
+                }
+
             }
         }
     }
